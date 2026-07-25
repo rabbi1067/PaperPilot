@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PaperPilot — Add Paper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/add-paper.css}">
+</head>
+<body>
+
+<div class="hud-frame">
+    <div class="hud-top">
+        <div>FLIGHT <span class="callsign">PP&#8209;2026</span><br/>
+            <span th:text="${isEdit} ? 'EDITING EXISTING FLIGHT PLAN' : 'FILING NEW FLIGHT PLAN'">FILING NEW FLIGHT PLAN</span>
+        </div>
+        <div class="status-pill">
+            <span class="status-dot"></span>
+            <span id="statusText" th:text="${isEdit} ? 'EDIT' : 'DRAFT'">DRAFT</span>
+        </div>
+    </div>
+
+    <div class="page">
+        <div class="page-head">
+            <div class="eyebrow" th:text="${isEdit} ? 'Scene 2 / 3 — Edit Paper' : 'Scene 2 / 3 — Add Paper'">Scene 2 / 3 — Add Paper</div>
+            <h1 class="title">
+                <span th:if="${isEdit}">Update <em>Flight Plan</em></span>
+                <span th:unless="${isEdit}">New <em>Flight Plan</em></span>
+            </h1>
+            <p class="subtitle">Every paper you file becomes a stop on your reading route. Fill in the details below to add it to the queue.</p>
+        </div>
+
+        <form id="paperForm" class="flight-plan" novalidate
+              th:object="${paper}"
+              th:action="${isEdit} ? @{/paper/update/{id}(id=${paper.id})} : @{/paper/add}"
+              method="post">
+
+            <fieldset class="plan-section">
+                <legend>Identification</legend>
+
+                <div class="field span-2">
+                    <label for="paperTitle">Paper Title <span class="req">*</span></label>
+                    <input type="text" id="paperTitle" th:field="*{paperTitle}" placeholder="e.g. Attention Is All You Need" required>
+                </div>
+
+                <div class="field">
+                    <label for="firstAuthor">First Author <span class="req">*</span></label>
+                    <input type="text" id="firstAuthor" th:field="*{firstAuthor}" placeholder="e.g. Ashish Vaswani" required>
+                </div>
+
+                <div class="field">
+                    <label for="publicationYear">Publication Year <span class="req">*</span></label>
+                    <input type="number" id="publicationYear" th:field="*{publicationYear}" placeholder="e.g. 2017" min="1950" max="2100" required>
+                </div>
+
+                <div class="field span-2">
+                    <label for="conferenceJournal">Conference / Journal</label>
+                    <input type="text" id="conferenceJournal" th:field="*{conferenceJournal}" placeholder="e.g. NeurIPS 2017">
+                </div>
+            </fieldset>
+
+            <fieldset class="plan-section">
+                <legend>Classification</legend>
+
+                <div class="field">
+                    <label for="researchArea">Research Area / Technique</label>
+                    <select id="researchArea" th:field="*{researchArea}">
+                        <option value="" disabled>Select an area</option>
+                        <option value="Machine Learning">Machine Learning</option>
+                        <option value="Deep Learning">Deep Learning</option>
+                        <option value="Natural Language Processing">Natural Language Processing</option>
+                        <option value="Computer Vision">Computer Vision</option>
+                        <option value="Reinforcement Learning">Reinforcement Learning</option>
+                        <option value="Data Mining">Data Mining</option>
+                        <option value="Cybersecurity">Cybersecurity</option>
+                        <option value="IoT">Internet of Things (IoT)</option>
+                        <option value="Cloud Computing">Cloud Computing</option>
+                        <option value="Software Engineering">Software Engineering</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="datasetUsed">Dataset Used</label>
+                    <input type="text" id="datasetUsed" th:field="*{datasetUsed}" placeholder="e.g. WMT 2014 En-De">
+                </div>
+
+                <div class="field span-2">
+                    <label for="paperUrl">Paper URL (DOI / arXiv / Publisher Link)</label>
+                    <input type="url" id="paperUrl" th:field="*{paperUrl}" placeholder="https://arxiv.org/abs/...">
+                </div>
+            </fieldset>
+
+            <fieldset class="plan-section">
+                <legend>Notes</legend>
+
+                <div class="field span-2">
+                    <label for="researchGap">Research Gap</label>
+                    <textarea id="researchGap" th:field="*{researchGap}" rows="4" placeholder="What gap or limitation does this paper address, or leave open?"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="readingStatus">Reading Status</label>
+                    <select id="readingStatus" th:field="*{readingStatus}">
+                        <option value="NOT_STARTED">Not Started</option>
+                        <option value="READING">Reading</option>
+                        <option value="COMPLETED">Completed</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <div class="form-footer">
+                <a class="btn-ghost" th:href="@{/paper/home}">&larr; Back to Home</a>
+                <a class="btn-secondary" th:href="@{/paper/list}">View Paper List</a>
+                <button type="submit" class="go-btn" id="submitBtn">
+                    <span th:text="${isEdit} ? 'Update Paper Info' : 'File Flight Plan'">File Flight Plan</span>
+                    <span class="tri"></span>
+                </button>
+            </div>
+
+            <p class="form-message" id="formMessage" role="status" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <div class="hud-bottom">
+        <div class="readouts">
+            <div class="readout"><div class="label">FIELDS FILLED</div><div class="value amber" id="fieldsFilled">0 / 9</div></div>
+            <div class="readout"><div class="label">REQUIRED LEFT</div><div class="value" id="requiredLeft">3</div></div>
+        </div>
+        <div class="grid-note">Scene 2 / 3 — Add Paper<br/>Next stop: Paper List</div>
+    </div>
+</div>
+
+<script th:src="@{/add-paper.js}"></script>
+</body>
+</html>

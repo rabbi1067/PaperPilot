@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PaperPilot — Reading Manifest</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,560;9..144,680&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/paper-list.css}">
+</head>
+<body>
+
+<div class="hud-frame">
+    <div class="hud-top">
+        <div>FLIGHT <span class="callsign">PP&#8209;2026</span><br/>READING MANIFEST</div>
+        <div class="status-pill"><span class="status-dot"></span> <span id="liveStatus">SCANNING QUEUE</span></div>
+    </div>
+
+    <div class="page">
+        <div class="page-head">
+            <div class="eyebrow">Scene 3 / 3 — Paper List</div>
+            <h1 class="title">Reading <em>Manifest</em></h1>
+            <p class="subtitle">Every boarding pass below is a paper on your route. Search, filter, and update status as you go.</p>
+        </div>
+
+        <!-- stats strip -->
+        <div class="stats-strip">
+            <div class="stat">
+                <div class="stat-value" id="statTotal" data-count="0" th:text="${papers.size()}">0</div>
+                <div class="stat-label">Total Filed</div>
+            </div>
+            <div class="stat stat-ground">
+                <div class="stat-value" id="statNotStarted" data-count="0">0</div>
+                <div class="stat-label">NOT_STARTED</div>
+            </div>
+            <div class="stat stat-flight">
+                <div class="stat-value" id="statReading" data-count="0">0</div>
+                <div class="stat-label">READING</div>
+            </div>
+            <div class="stat stat-landed">
+                <div class="stat-value" id="statCompleted" data-count="0">0</div>
+                <div class="stat-label">COMPLETED</div>
+            </div>
+        </div>
+
+        <!-- controls -->
+        <div class="controls">
+            <div class="search-box">
+                <svg class="search-icon" viewBox="0 0 20 20" fill="none"><circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6"/><line x1="14" y1="14" x2="18.5" y2="18.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <input type="text" id="searchInput" placeholder="Search by title, author, or area…">
+            </div>
+            <div class="chip-row" id="statusChips">
+                <button class="chip active" data-status="ALL">All</button>
+                <button class="chip" data-status="NOT_STARTED">NOT_STARTED</button>
+                <button class="chip" data-status="READING">READING</button>
+                <button class="chip" data-status="COMPLETED">COMPLETED</button>
+            </div>
+            <a class="add-link" href="/paper/add">+ File New Paper</a>
+        </div>
+
+        <!-- manifest: one boarding-pass ticket per paper, no horizontal scrolling, no overlap -->
+        <div class="manifest-list" id="manifestList" th:if="${papers.size() > 0}">
+            <article class="ticket"
+                     th:each="paper : ${papers}"
+                     th:data-title="${paper.paperTitle}"
+                     th:data-author="${paper.firstAuthor}"
+                     th:data-area="${paper.researchArea}"
+                     th:data-status="${paper.readingStatus}">
+
+                <div class="ticket-main">
+                    <div class="ticket-top">
+                        <span class="area-pill" th:attr="data-area=${paper.researchArea}" th:text="${paper.researchArea}">Area</span>
+                        <span th:class="'status-pill-cell status-' + ${paper.readingStatus}"
+                              th:text="${paper.readingStatus}">Status</span>
+                    </div>
+
+                    <h3 class="ticket-title" th:text="${paper.paperTitle}" th:attr="title=${paper.paperTitle}">Paper title</h3>
+
+                    <div class="ticket-meta">
+                        <span th:text="${paper.firstAuthor}">Author</span>
+                        <span class="meta-sep">•</span>
+                        <span th:text="${paper.conferenceJournal}">Venue</span>
+                        <span class="meta-sep">•</span>
+                        <span th:text="${paper.publicationYear}">Year</span>
+                        <th:block th:if="${paper.datasetUsed != null and !paper.datasetUsed.isEmpty()}">
+                            <span class="meta-sep">•</span>
+                            <span class="meta-dataset" th:text="'Dataset: ' + ${paper.datasetUsed}">Dataset</span>
+                        </th:block>
+                    </div>
+
+                    <p class="ticket-gap" th:text="${paper.researchGap}" th:attr="title=${paper.researchGap}">Research gap</p>
+                </div>
+
+                <div class="ticket-stub">
+                    <a th:if="${paper.paperUrl != null and !paper.paperUrl.isEmpty()}"
+                       th:href="${paper.paperUrl}" target="_blank" rel="noopener" class="paper-link stub-link">View &rarr;</a>
+                    <span th:unless="${paper.paperUrl != null and !paper.paperUrl.isEmpty()}" class="link-empty">No link</span>
+
+                    <div class="stub-actions">
+                        <a class="edit-btn" th:href="@{/paper/edit/{id}(id=${paper.id})}">Edit</a>
+                        <a class="delete-btn-txt" th:href="@{/paper/delete/{id}(id=${paper.id})}">Delete</a>
+                    </div>
+                </div>
+            </article>
+
+            <!-- shown by JS when search/filter matches nothing -->
+            <div class="state-panel no-match" id="noMatchState" hidden>
+                <p>No papers match this filter.</p>
+            </div>
+        </div>
+
+        <!-- empty state (no papers at all) -->
+        <div class="state-panel empty-state" th:if="${papers.size() == 0}">
+            <div class="empty-plane">&#9992;</div>
+            <p>No flight plans filed yet.</p>
+            <a href="/paper/add" class="go-btn">File your first paper <span class="tri"></span></a>
+        </div>
+    </div>
+
+    <div class="hud-bottom">
+        <div class="grid-note-left">Scene 3 / 3 — Paper List</div>
+        <div class="grid-note">Back to <a href="/paper/home">Home</a></div>
+    </div>
+</div>
+
+<script src="/paper-list.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PaperPilot — Delete Paper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/paper-delete.css}">
+</head>
+<body>
+
+<div class="del-card">
+
+    <div class="del-icon-wrap">
+        <svg class="del-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m2 0v13a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7h10Z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+    </div>
+
+    <h1 class="del-heading">Delete this paper?</h1>
+    <p class="del-subtext">This will permanently remove the entry from your manifest. This action can't be undone.</p>
+
+    <div class="del-details">
+        <div class="del-row">
+            <span class="del-key">Title</span>
+            <span class="del-val" th:text="${paper.paperTitle}">Paper title</span>
+        </div>
+        <div class="del-row">
+            <span class="del-key">Author</span>
+            <span class="del-val" th:text="${paper.firstAuthor}">Author</span>
+        </div>
+        <div class="del-row">
+            <span class="del-key">Year</span>
+            <span class="del-val" th:text="${paper.publicationYear}">Year</span>
+        </div>
+        <div class="del-row">
+            <span class="del-key">Status</span>
+            <span class="del-val">
+                <span th:class="'status-tag status-' + ${paper.readingStatus}"
+                      th:text="${paper.readingStatus}">COMPLETED</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="del-actions">
+        <a class="btn btn-cancel" th:href="@{/paper/list}">Cancel</a>
+        <form th:action="@{/paper/delete/{id}(id=${paper.id})}" method="post" class="del-form">
+            <button type="submit" class="btn btn-delete">Delete Paper</button>
+        </form>
+    </div>
+</div>
+
+<script src="/paper-delete.js"></script>
+</body>
+</html>
